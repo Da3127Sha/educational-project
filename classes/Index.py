@@ -1,5 +1,5 @@
 class Index:
-    fieldName = None # object of Field name
+    fieldName = None # Field name
     props = None
 
     def __init__(self, fieldName):

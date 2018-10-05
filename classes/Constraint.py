@@ -1,7 +1,7 @@
 class Constraint:
     kind = None
-    items = None # object of Field name
-    reference = None # object of Table name
+    items = None # Field name
+    reference = None # Table name
     props = None
 
     def __init__(self, kind):
