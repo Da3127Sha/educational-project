@@ -7,7 +7,7 @@ Educational project for collective application development
     + `DBDSchema.py` - database schema type
     + `Domain.py` - domain type
     + `Field.py` - field type
-    + `Index.py` index type
+    + `Index.py` - index type
     + `Table.py` - table type
 + resources
     + `prjadm.xml` - file with xml description of `PRJADM` database schema
