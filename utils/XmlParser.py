@@ -59,6 +59,7 @@ def createObjectFromXml(path):
         for xmlIndex in xmlIndices:
             index = Index(xmlIndex.getAttribute("field"))
             index.setProps(xmlIndex.getAttribute("props"))
+            table.setIndex(index)
 
         schema.setTable(table.getName(), table)
     return schema
