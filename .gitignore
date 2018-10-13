@@ -7,8 +7,11 @@ __pycache__/
 # C extensions
 *.so
 
+#IDE metadata
+**.idea/*
+.idea/*
+
 # Distribution / packaging
-.idea/
 .Python
 build/
 develop-eggs/
