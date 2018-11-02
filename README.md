@@ -14,4 +14,5 @@ Educational project for collective application development
     + `tasks.xml` - file with xml description of `TASKS` database schema
 + utils
     + `XmlParser.py` - contains function `createObjectFromXml` which creates classes from xml description
+    + `DBInitializer` - class, which contains functions for database initialization
 + `MainApplication.py` - main application
