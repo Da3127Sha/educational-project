@@ -6,6 +6,7 @@ from classes.Field import Field
 from classes.Constraint import Constraint
 from classes.Index import Index
 
+
 def createObjectFromXml(path):
     doc = minidom.parse(path)
 
@@ -28,7 +29,7 @@ def createObjectFromXml(path):
         domain.setLength(xmlDomain.getAttribute("length"))
         domain.setScale(xmlDomain.getAttribute("scale"))
         schema.setDomain(domain.getName(), domain)
-        #if (domain.getPrecision() != ""):
+        # if (domain.getPrecision() != ""):
         #    print(domain.getPrecision())
 
     xmlTables = doc.getElementsByTagName("table")
@@ -63,6 +64,3 @@ def createObjectFromXml(path):
 
         schema.setTable(table.getName(), table)
     return schema
-
-
-
