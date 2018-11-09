@@ -1,11 +1,11 @@
 from utils.XmlParser import *
 from utils.DBInitializer import *
 
-schemaTasks = createObjectFromXml("./resources/tasks.xml")
-schemaPrjadm = createObjectFromXml("./resources/prjadm.xml")
-print(schemaTasks.getTable("ADDRESS").getField("Region").getRname())
-print(schemaPrjadm.getTable("CASCDEL").getField("KodKaskad").getRname())
-print(schemaTasks.getFulltextEngine())
-print(schemaPrjadm.getFulltextEngine())
+schema_tasks = create_object_from_xml("./resources/tasks.xml")
+schema_prjadm = create_object_from_xml("./resources/prjadm.xml")
+print(schema_tasks.get_table("ADDRESS").get_field("Region").get_rname())
+print(schema_prjadm.get_table("CASCDEL").get_field("KodKaskad").get_rname())
+print(schema_tasks.get_fulltext_engine())
+print(schema_prjadm.get_fulltext_engine())
 inital = DBInitializer("database.db")
-inital.initDB()
+inital.init_database()

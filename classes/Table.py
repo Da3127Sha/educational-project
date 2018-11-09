@@ -1,16 +1,18 @@
 class Table:
-    parametersOrder = None  # list of names of table parameters
-    fieldsOrder = None  # list of rnames of field parameters
-    constraintsOrder = None  # list of items of constraint parameters
-    indicesOrder = None  # list of field of index parameters
+    parameters_order = None  # list of names of table parameters, will be useful when RAM->XML
+    #fieldsOrder = None  # list of rnames of field parameters
+    #constraintsOrder = None  # list of items of constraint parameters
+    #indicesOrder = None  # list of field of index parameters
     name = None
     description = None
     props = None
-    htTableFlags = None
-    accessLevel = None
-    fields = None  # list of Field type objects
+    ht_table_flags = None
+    access_level = None
+    fields = None  # dictionary of Field type objects
     constraints = None  # list of Constraint type objects
     indices = None  # list of Index type objects
+    temporal_mode = None
+    means = None
 
     def __init__(self, name):
         self.name = name
@@ -19,74 +21,81 @@ class Table:
         self.indices = []
         self.parametersOrder = []
         if (self.name is not None) | (self.name != ""):
-            self.parametersOrder.append("name")
-        self.constraintsOrder = []
-        self.fieldsOrder = []
-        self.indicesOrder = []
+            self.parameters_order.append("name")
+        #self.constraints_order = []
+        #self.fieldsOrder = []
+        #self.indicesOrder = []
 
-    def setName(self, name):
+    def set_name(self, name):
         self.name = name
         if (self.name is not None) | (self.name != ""):
-            self.parametersOrder.append("name")
+            self.parameters_order.append("name")
 
-    def getName(self):
+    def get_name(self):
         return self.name
 
-    def setDescription(self, description):
+    def set_description(self, description):
         self.description = description
         if (self.description is not None) | (self.description != ""):
-            self.parametersOrder.append("description")
+            self.parameters_order.append("description")
 
-    def getDescription(self):
+    def get_description(self):
         return self.description
 
-    def setProps(self, props):
-        self.props = []
-        for property in props.split(","):
-            self.props.append(property.strip())
-        if (self.props is not None) | (len(self.props) != 0):
-            self.parametersOrder.append("props")
+    def set_props(self, props):
+        props_temp = []
+        for prop in props.split(","):
+            props_temp.append(prop.strip())
+        if (props_temp is not None) | (len(props_temp) != 0):
+            self.parameters_order.append("props")
+        self.props = set(props_temp)
 
-    def getProps(self):
+    def get_props(self):
         return self.props
 
-    def setHtTableFlags(self, htTableFlags):
-        self.htTableFlags = htTableFlags
-        if (self.htTableFlags is not None) | (self.htTableFlags != ""):
-            self.parametersOrder.append("htTableFlags")
+    def if_prop_exists(self, prop):
+        if (prop in self.props):
+            return True
+        else:
+            return False
 
-    def getHtTableFlags(self):
-        return self.htTableFlags
+    def set_ht_table_flags(self, ht_table_flags ):
+        self.ht_table_flags = ht_table_flags
+        if (self.ht_table_flags is not None) | (self.ht_table_flags != ""):
+            self.parametersOrder.append("ht_table_flags ")
 
-    def setAccessLevel(self, accessLevel):
-        self.accessLevel = accessLevel
-        if (self.accessLevel is not None) | (self.accessLevel != ""):
-            self.parametersOrder.append("accessLevel")
+    def get_ht_table_flags(self):
+        return self.ht_table_flags
 
-    def getAccessLevel(self):
-        return self.accessLevel
+    def set_access_level(self, access_level):
+        if (access_level is not None) | (access_level != ""):
+            self.access_level = int(access_level)
+            self.parameters_order.append("access_level")
 
-    def setField(self, fieldName, field):
-        self.fields[fieldName] = field
-        if (self.fields is not None) | (len(self.fields) != 0):
-            self.fieldsOrder.append(field.getRname())
+    def get_access_level(self):
+        return self.access_level
 
-    def getField(self, fieldName):
-        return self.fields.get(fieldName)
+    def set_field(self, field_name, field):
+        self.fields[field_name] = field
+        #if (self.fields is not None) | (len(self.fields) != 0):
+            #self.fields_order.append(field.rname)
 
-    def getFields(self):
+    def get_field(self, field_name):
+        return self.fields.get(field_name)
+
+    def get_fields(self):
         return self.fields
 
-    def setConstraint(self, constraint):
+    def set_constraint(self, constraint):
         self.constraints.append(constraint)
-        self.constraintsOrder.append(constraint.getItems())
+        #self.constraints_order.append(constraint.getItems())
 
-    def getConstraints(self):
+    def get_constraints(self):
         return self.constraints
 
-    def setIndex(self, index):
+    def set_index(self, index):
         self.indices.append(index)
-        self.indicesOrder.append(index.getFieldName())
+        #self.indicesOrder.append(index.getFieldName())
 
-    def getIndices(self):
+    def get_indices(self):
         return self.indices

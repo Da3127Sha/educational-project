@@ -5,50 +5,54 @@ CURRENT_DBD_VERSION = '3.1'
 
 class DBInitializer:
 
-    fileName = None
+    file_name = None
     connection = None
     cursor = None
 
-    def __init__(self, fileName):
-        self.fileName = fileName
-        self.connection = sqlite3.connect(self.fileName)
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self.connection = sqlite3.connect(self.file_name)
 
     # TODO:
-    def initDB(self):
+    def init_database(self):
         self.cursor = self.connection.cursor()
         self.cursor.execute("pragma foreign_keys=on;")
         self.cursor.execute("begin transaction;")
 
-        self.createSchemasTable()
-        self.createDomainsTable()
-        self.createTablesTable()
-        self.createFieldsTable()
-        self.createSettingsTable()
-        self.createConstraintsTable()
-        self.createConstraintDetailsTable()
-        self.createIndicesTable()
-        self.createIndexDetailsTable()
-        self.createDataTypesTable()
-        self.insertIntoDataTypesAndSettings()
-        self.createViewFields()
-        self.createViewDomains()
-        self.createViewConstraints()
-        self.createViewIndices()
+        self.create_schemas_table()
+        self.create_domains_table()
+        self.create_tables_table()
+        self.create_fields_table()
+        self.create_settings_table()
+        self.create_constraints_table()
+        self.create_constraint_details_table()
+        self.create_indices_table()
+        self.create_index_details_table()
+        self.create_data_types_table()
+        self.insert_into_data_types_and_settings()
+        self.create_view_fields()
+        self.create_view_domains()
+        self.create_view_constraints()
+        self.create_view_indices()
 
         self.connection.commit()
         self.cursor.close()
 
-    def createSchemasTable(self):
+    def create_schemas_table(self):
         self.cursor.execute(
             """create table dbd$schemas (
             id integer primary key autoincrement not null,
-            name varchar not null);"""
+            name varchar not null,
+            fulltext_engine varchar default(null),
+            version varchar default(null),
+            description varchar default(null)
+            );"""
         )
 
-    def createDomainsTable(self):
+    def create_domains_table(self):
         self.cursor.execute(
             """create table dbd$domains (
-               id  integer primary key autoincrement default(null),
+               id  integer primary key autoincrement not null,
                name varchar unique default(null),  -- имя домена
                description varchar default(null),  -- описание
                data_type_id integer not null,      -- идентификатор типа (dbd$data_types)
@@ -63,7 +67,7 @@ class DBInitializer:
                thousands_separator boolean default(null),  -- нужен ли разделитель тысяч?
                summable boolean default(null),             -- признак того, что поле является суммируемым
                case_sensitive boolean default(null),       -- признак необходимости регистронезависимого поиска для поля
-               uuid varchar unique not null COLLATE NOCASE -- уникальный идентификатор домена
+               uuid varchar unique default(null) COLLATE NOCASE -- уникальный идентификатор домена
              );""")
         self.cursor.execute(
             """create index "idx.FZX832TFV" on dbd$domains(data_type_id);"""
@@ -72,7 +76,7 @@ class DBInitializer:
             """create index "idx.4AF9IY0XR" on dbd$domains(uuid);"""
         )
 
-    def createTablesTable(self):
+    def create_tables_table(self):
         self.cursor.execute(
             """create table dbd$tables (
                id integer primary key autoincrement default(null),
@@ -82,9 +86,11 @@ class DBInitializer:
                can_add boolean default(null),        -- разрешено ли добавление в таблицу
                can_edit boolean default(null),       -- разрешено ли редактирование  таблице?
                can_delete boolean default(null),     -- разрешено ли удаление в таблице
+               ht_table_flags varchar default(null),
+               access_level integer default(null),
                temporal_mode varchar default(null),  -- временная таблица или нет? Если временная, то какого типа?
                means varchar default(null),          -- шаблон описания записи таблицы
-               uuid varchar unique not null COLLATE NOCASE  -- уникальный идентификатор таблицы
+               uuid varchar unique default(null) COLLATE NOCASE  -- уникальный идентификатор таблицы
             );""")
         self.cursor.execute(
             """create index "idx.GCOFIBEBJ" on dbd$tables(name);"""
@@ -93,7 +99,7 @@ class DBInitializer:
             """create index "idx.2J02T9LQ7" on dbd$tables(uuid);"""
         )
 
-    def createFieldsTable(self):
+    def create_fields_table(self):
         self.cursor.execute(
             """create table dbd$fields (
                id integer primary key autoincrement default(null),
@@ -110,7 +116,7 @@ class DBInitializer:
                is_mean boolean default(null),         -- является ли поле элементом описания записи таблицы?
                autocalculated boolean default(null),  -- признак того, что значение в поле вычисляется программным кодом
                required boolean default(null),        -- признак того, что поле дорлжно быть заполнено
-               uuid varchar unique not null COLLATE NOCASE -- уникальный идентификатор поля
+               uuid varchar unique default(null) COLLATE NOCASE -- уникальный идентификатор поля
            );""")
         self.cursor.execute(
            """create index "idx.7UAKR6FT7" on dbd$fields(table_id);"""
@@ -128,7 +134,7 @@ class DBInitializer:
             """create index "idx.88KWRBHA7" on dbd$fields(uuid);"""
         )
 
-    def createSettingsTable(self):
+    def create_settings_table(self):
         self.cursor.execute(
             """create table dbd$settings (
                key varchar primary key not null,
@@ -137,7 +143,7 @@ class DBInitializer:
            );"""
         )
 
-    def createConstraintsTable(self):
+    def create_constraints_table(self):
         self.cursor.execute(
             """create table dbd$constraints (
                id integer primary key autoincrement default (null),
@@ -149,7 +155,7 @@ class DBInitializer:
                has_value_edit boolean default(null),   -- признак наличия поля ввода ключа
                cascading_delete boolean default(null), -- признак каскадного удаления для внешнего ключа
                expression varchar default(null),       -- выражение для контрольного ограничения
-               uuid varchar unique not null COLLATE NOCASE -- уникальный идентификатор ограничения
+               uuid varchar unique default(null) COLLATE NOCASE -- уникальный идентификатор ограничения
            );""")
         self.cursor.execute(
            """create index "idx.6F902GEQ3" on dbd$constraints(table_id);"""
@@ -170,7 +176,7 @@ class DBInitializer:
             """create index "idx.6IOUMJINZ" on dbd$constraints(uuid);"""
         )
 
-    def createConstraintDetailsTable(self):
+    def create_constraint_details_table(self):
         self.cursor.execute(
             """create table dbd$constraint_details (
                id integer primary key autoincrement default(null),
@@ -188,7 +194,7 @@ class DBInitializer:
             """create index "idx.4NG17JVD7" on dbd$constraint_details(field_id);"""
         )
 
-    def createIndicesTable(self):
+    def create_indices_table(self):
         self.cursor.execute(
             """create table dbd$indices (
                id integer primary key autoincrement default(null),
@@ -196,7 +202,7 @@ class DBInitializer:
                name varchar default(null),                         -- имя индекса
                local boolean default(0),                           -- показывает тип индекса: локальный или глобальный
                kind char default(null),                            -- вид индекса (простой/уникальный/полнотекстовый)
-               uuid varchar unique not null COLLATE NOCASE         -- уникальный идентификатор индекса
+               uuid varchar unique default(null) COLLATE NOCASE         -- уникальный идентификатор индекса
            );""")
         self.cursor.execute(
            """create index "idx.12XXTJUYZ" on dbd$indices(table_id);"""
@@ -208,7 +214,7 @@ class DBInitializer:
             """create index "idx.FQH338PQ7" on dbd$indices(uuid);"""
         )
 
-    def createIndexDetailsTable(self):
+    def create_index_details_table(self):
         self.cursor.execute(
             """create table dbd$index_details (
                id integer primary key autoincrement default(null),
@@ -225,7 +231,7 @@ class DBInitializer:
             """create index "idx.BQA4HXWNF" on dbd$index_details(field_id);"""
         )
 
-    def createDataTypesTable(self):
+    def create_data_types_table(self):
         self.cursor.execute(
             """create table dbd$data_types (
                id integer primary key autoincrement, -- идентификатор типа
@@ -233,54 +239,52 @@ class DBInitializer:
            );"""
         )
 
-    def insertIntoDataTypesAndSettings(self):
-        self.insertDataType('STRING')
-        self.insertDataType('SMALLINT')
-        self.insertDataType('INTEGER')
-        self.insertDataType('WORD')
-        self.insertDataType('BOOLEAN')
-        self.insertDataType('FLOAT')
-        self.insertDataType('CURRENCY')
-        self.insertDataType('BCD')
-        self.insertDataType('FMTBCD')
-        self.insertDataType('DATE')
-        self.insertDataType('TIME')
-        self.insertDataType('DATETIME')
-        self.insertDataType('TIMESTAMP')
-        self.insertDataType('BYTES')
-        self.insertDataType('VARBYTES')
-        self.insertDataType('BLOB')
-        self.insertDataType('MEMO')
-        self.insertDataType('GRAPHIC')
-        self.insertDataType('FMTMEMO')
-        self.insertDataType('FIXEDCHAR')
-        self.insertDataType('WIDESTRING')
-        self.insertDataType('LARGEINT')
-        self.insertDataType('COMP')
-        self.insertDataType('ARRAY')
-        self.insertDataType('FIXEDWIDECHAR')
-        self.insertDataType('WIDEMEMO')
-        self.insertDataType('CODE')
-        self.insertDataType('RECORDID')
-        self.insertDataType('SET')
-        self.insertDataType('PERIOD')
-        self.insertDataType('BYTE')
+    def insert_into_data_types_and_settings(self):
+        self.insert_data_type('STRING')
+        self.insert_data_type('SMALLINT')
+        self.insert_data_type('INTEGER')
+        self.insert_data_type('WORD')
+        self.insert_data_type('BOOLEAN')
+        self.insert_data_type('FLOAT')
+        self.insert_data_type('CURRENCY')
+        self.insert_data_type('BCD')
+        self.insert_data_type('FMTBCD')
+        self.insert_data_type('DATE')
+        self.insert_data_type('TIME')
+        self.insert_data_type('DATETIME')
+        self.insert_data_type('TIMESTAMP')
+        self.insert_data_type('BYTES')
+        self.insert_data_type('VARBYTES')
+        self.insert_data_type('BLOB')
+        self.insert_data_type('MEMO')
+        self.insert_data_type('GRAPHIC')
+        self.insert_data_type('FMTMEMO')
+        self.insert_data_type('FIXEDCHAR')
+        self.insert_data_type('WIDESTRING')
+        self.insert_data_type('LARGEINT')
+        self.insert_data_type('COMP')
+        self.insert_data_type('ARRAY')
+        self.insert_data_type('FIXEDWIDECHAR')
+        self.insert_data_type('WIDEMEMO')
+        self.insert_data_type('CODE')
+        self.insert_data_type('RECORDID')
+        self.insert_data_type('SET')
+        self.insert_data_type('PERIOD')
+        self.insert_data_type('BYTE')
 
         self.cursor.execute(
               """insert into dbd$settings(key, value) values ('dbd.version', '%(dbd_version)s');
            """ % {'dbd_version': CURRENT_DBD_VERSION}
         )
 
-    def insertDataType(self, value):
+    def insert_data_type(self, value):
         self.cursor.execute(
             """insert into dbd$data_types(type_id) values ('%(value)s');
             """ % {'value' : value}
         )
 
-
-    def createViewFields(self):
-        cursor = self.connection.cursor()
-        cursor.execute(
+    def create_view_fields(self):
+        self.cursor.execute(
             """create view dbd$view_fields as
            select
              dbd$schemas.name "schema",
@@ -317,11 +321,9 @@ class DBInitializer:
              dbd$tables.name,
              dbd$fields.position;"""
         )
-        cursor.close()
 
-    def createViewDomains(self):
-        cursor = self.connection.cursor()
-        cursor.execute(
+    def create_view_domains(self):
+        self.cursor.execute(
             """create view dbd$view_domains as
            select
              dbd$domains.id,
@@ -343,11 +345,9 @@ class DBInitializer:
              inner join dbd$data_types on dbd$domains.data_type_id = dbd$data_types.id
            order by dbd$domains.id;"""
         )
-        cursor.close()
 
-    def createViewConstraints(self):
-        cursor = self.connection.cursor()
-        cursor.execute(
+    def create_view_constraints(self):
+        self.cursor.execute(
             """create view dbd$view_constraints as
            select
              dbd$constraints.id "constraint_id",
@@ -367,11 +367,9 @@ class DBInitializer:
            order by
              constraint_id, position;"""
         )
-        cursor.close()
 
-    def createViewIndices(self):
-        cursor = self.connection.cursor()
-        cursor.execute(
+    def create_view_indices(self):
+        self.cursor.execute(
             """create view dbd$view_indices as
            select
              dbd$indices.id "index_id",
@@ -393,4 +391,3 @@ class DBInitializer:
            order by
              dbd$tables.name, dbd$indices.name, dbd$index_details.position;"""
         )
-        cursor.close()

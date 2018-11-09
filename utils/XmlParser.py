@@ -7,60 +7,60 @@ from classes.Constraint import Constraint
 from classes.Index import Index
 
 
-def createObjectFromXml(path):
+def create_object_from_xml(path):
     doc = minidom.parse(path)
 
-    xmlSchema = doc.getElementsByTagName("dbd_schema")[0]
-    schema = DBDSchema(xmlSchema.getAttribute("fulltext_engine"))
-    schema.setVersion(xmlSchema.getAttribute("version"))
-    schema.setName(xmlSchema.getAttribute("name"))
-    schema.setDescription("description")
+    xml_schema = doc.getElementsByTagName("dbd_schema")[0]
+    schema = DBDSchema(xml_schema.getAttribute("fulltext_engine"))
+    schema.set_version(xml_schema.getAttribute("version"))
+    schema.set_name(xml_schema.getAttribute("name"))
+    schema.set_description("description")
 
-    xmlDomains = doc.getElementsByTagName("domain")
-    for xmlDomain in xmlDomains:
-        domain = Domain(xmlDomain.getAttribute("name"),
-                        xmlDomain.getAttribute("type"))
-        domain.setAlign(xmlDomain.getAttribute("align"))
-        domain.setWidth(xmlDomain.getAttribute("width"))
-        domain.setCharLength(xmlDomain.getAttribute("char_length"))
-        domain.setDescription(xmlDomain.getAttribute("description"))
-        domain.setProps(xmlDomain.getAttribute("props"))
-        domain.setPrecision(xmlDomain.getAttribute("precision"))
-        domain.setLength(xmlDomain.getAttribute("length"))
-        domain.setScale(xmlDomain.getAttribute("scale"))
-        schema.setDomain(domain.getName(), domain)
-        # if (domain.getPrecision() != ""):
-        #    print(domain.getPrecision())
+    xml_domains = doc.getElementsByTagName("domain")
+    for xml_domain in xml_domains:
+        domain = Domain(xml_domain.getAttribute("name"),
+                        xml_domain.getAttribute("type"))
+        domain.set_align(xml_domain.getAttribute("align"))
+        domain.set_width(xml_domain.getAttribute("width"))
+        domain.set_char_length(xml_domain.getAttribute("char_length"))
+        domain.set_description(xml_domain.getAttribute("description"))
+        domain.set_props(xml_domain.getAttribute("props"))
+        domain.set_precision(xml_domain.getAttribute("precision"))
+        domain.set_length(xml_domain.getAttribute("length"))
+        domain.set_scale(xml_domain.getAttribute("scale"))
+        schema.set_domain(domain.name, domain)
 
-    xmlTables = doc.getElementsByTagName("table")
-    for xmlTable in xmlTables:
-        table = Table(xmlTable.getAttribute("name"))
-        table.setDescription(xmlTable.getAttribute("description"))
-        table.setProps(xmlTable.getAttribute("props"))
-        table.setHtTableFlags(xmlTable.getAttribute("ht_table_flags"))
-        table.setAccessLevel(xmlTable.getAttribute("access_level"))
+    xml_tables = doc.getElementsByTagName("table")
+    for xml_table in xml_tables:
+        table = Table(xml_table.getAttribute("name"))
+        table.set_description(xml_table.getAttribute("description"))
+        table.set_props(xml_table.getAttribute("props"))
+        table.set_ht_table_flags(xml_table.getAttribute("ht_table_flags"))
+        table.set_access_level(xml_table.getAttribute("access_level"))
 
-        xmlFields = xmlTable.getElementsByTagName("field")
-        for xmlField in xmlFields:
-            field = Field(xmlField.getAttribute("name"),
-                          xmlField.getAttribute("rname"))
-            field.setDomain(schema.getDomain(xmlField.getAttribute("domain")))
-            field.setProps(xmlField.getAttribute("props"))
-            table.setField(field.getName(), field)
+        xml_fields = xml_table.getElementsByTagName("field")
+        position = 1
+        for xml_field in xml_fields:
+            field = Field(xml_field.getAttribute("name"), position)
+            field.set_rname(xml_field.getAttribute("rname"))
+            field.set_domain(schema.get_domain(xml_field.getAttribute("domain")))
+            field.set_props(xml_field.getAttribute("props"))
+            table.set_field(field.name, field)
+            position += 1
 
-        xmlConstraints = xmlTable.getElementsByTagName("constraint")
-        for xmlConstraint in xmlConstraints:
-            constraint = Constraint(xmlConstraint.getAttribute("kind"))
-            constraint.setProps(xmlConstraint.getAttribute("props"))
-            constraint.setReference(xmlConstraint.getAttribute("reference"))
-            constraint.setItems(xmlConstraint.getAttribute("items"))
-            table.setConstraint(constraint)
+        xml_constraints = xml_table.getElementsByTagName("constraint")
+        for xml_constraint in xml_constraints:
+            constraint = Constraint(xml_constraint.getAttribute("kind"))
+            constraint.set_props(xml_constraint.getAttribute("props"))
+            constraint.set_reference(xml_constraint.getAttribute("reference"))
+            constraint.set_items(xml_constraint.getAttribute("items"))
+            table.set_constraint(constraint)
 
-        xmlIndices = xmlTable.getElementsByTagName("index")
-        for xmlIndex in xmlIndices:
-            index = Index(xmlIndex.getAttribute("field"))
-            index.setProps(xmlIndex.getAttribute("props"))
-            table.setIndex(index)
+        xml_indices = xml_table.getElementsByTagName("index")
+        for xml_index in xml_indices:
+            index = Index(xml_index.getAttribute("field"))
+            index.setProps(xml_index.getAttribute("props"))
+            table.set_index(index)
 
-        schema.setTable(table.getName(), table)
+        schema.set_table(table.name)
     return schema
