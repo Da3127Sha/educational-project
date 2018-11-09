@@ -48,9 +48,10 @@ def create_object_from_xml(path):
             table.set_field(field.name, field)
             position += 1
 
+        position = 1
         xml_constraints = xml_table.getElementsByTagName("constraint")
         for xml_constraint in xml_constraints:
-            constraint = Constraint(xml_constraint.getAttribute("kind"))
+            constraint = Constraint(xml_constraint.getAttribute("kind"), position)
             constraint.set_props(xml_constraint.getAttribute("props"))
             constraint.set_reference(xml_constraint.getAttribute("reference"))
             constraint.set_items(xml_constraint.getAttribute("items"))
@@ -62,5 +63,5 @@ def create_object_from_xml(path):
             index.setProps(xml_index.getAttribute("props"))
             table.set_index(index)
 
-        schema.set_table(table.name)
+        schema.set_table(table)
     return schema

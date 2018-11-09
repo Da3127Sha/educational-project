@@ -4,15 +4,18 @@ class Constraint:
     items = None  # field name
     reference = None  # table name
     props = None
+    position = None
 
-    def __init__(self, kind):
+    def __init__(self, kind, position):
         self.parameters_order = []
-        if (self.kind is not None) | (self.kind != ""):
+        if (kind is not None) & (kind != ""):
             self.kind = kind
             self.parameters_order.append("kind")
+        if (position is not None) | (position != ""):
+            self.position = int(position)
 
     def set_kind(self, kind):
-        if (self.kind is not None) | (self.kind != ""):
+        if (kind is not None) & (kind != ""):
             self.kind = kind
             self.parameters_order.append("kind")
 
@@ -21,7 +24,7 @@ class Constraint:
         return self.kind
 
     def set_reference(self, reference):
-        if (self.reference is not None) | (self.reference != ""):
+        if (reference is not None) & (reference != ""):
             self.reference = reference
             self.parameters_order.append("reference")
 
@@ -32,7 +35,7 @@ class Constraint:
         props_temp = []
         for prop in props.split(","):
             props_temp.append(prop.strip())
-        if (props_temp is not None) | (len(props_temp) != 0):
+        if (props_temp is not None) & (len(props_temp) != 0):
             self.parameters_order.append("props")
         self.props = set(props_temp)
 
@@ -46,10 +49,9 @@ class Constraint:
             return False
 
     def set_items(self, items):
-        if (self.items is not None) | (self.items != ""):
+        if (items is not None) & (items != ""):
             self.items = items
             self.parameters_order.append("items")
-
 
     def get_items(self):
         return self.items

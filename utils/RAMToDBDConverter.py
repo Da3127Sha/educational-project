@@ -18,12 +18,14 @@ class RAMToDBDConverter:
     schema_id_dict = None
     table_id_dict = None
     domain_id_dict = None
+    field_of_table_id_dict = None
 
     def __init__(self, file_name):
         self.type_id_dict = {}
         self.schema_id_dict = {}
         self.table_id_dict = {}
         self.domain_id_dict = {}
+        self.field_of_table_id_dict = {}
 
         self.file_name = file_name
         self.connection = sqlite3.connect(self.file_name)
@@ -56,6 +58,13 @@ class RAMToDBDConverter:
         for i, record in enumerate(records):
             self.table_id_dict[record[1]] = record[0]
 
+    def get_field_of_table_id_dict(self, table_id):
+        self.cursor.execute("""
+        select id, name from dbd$fields where table_id=?""", (table_id))
+        records = self.cursor.fetchall()
+        for i, record in enumerate(records):
+            self.table_id_dict[record[1]] = record[0]
+
     # TODO:
     def RAM_to_DBD(self, schemas):
         self.cursor = self.connection.cursor()
@@ -72,7 +81,7 @@ class RAMToDBDConverter:
         for schema in schemas:
             for table in schema.tables.values():
                 self.insert_fields(table.fields, table.name)
-                self.insert_constraints(table.constraints, table.name)
+                self.insert_constraints_and_details(table.constraints, table.name)
 
         self.connection.commit()
         self.cursor.close()
@@ -183,20 +192,35 @@ class RAMToDBDConverter:
                   ) for field in fields.values())
         )
 
-    def insert_constraints(self, constraints, table_name):
-        self.cursor.executemany(
-            """insert into dbd$constraints (
-            table_id,
-            name,
-            constraint_type,
-            reference,
-            has_value_edit,
-            cascading_delete) values (?, ?, ?, ?, ?, ?)""",
-            list((self.schema_id_dict.get(table_name),
-                  constraint.kind,
-                  list(constraint.kind).pop(0),
-                  self.table_id_dict.get(constraint.reference),
-                  constraint.if_prop_exists("has_value_edit"),
-                  constraint.if_prop_exists("cascading_delete")
-                  ) for constraint in constraints)
-        )
+    def insert_constraints_and_details(self, constraints, table_name):
+        table_id = self.schema_id_dict.get(table_name)
+        self.field_of_table_id_dict.clear()
+        self.get_field_of_table_id_dict(table_id)
+        for constraint in constraints:
+            self.cursor.execute(
+                """insert into dbd$constraints (
+                table_id,
+                name,
+                constraint_type,
+                reference,
+                has_value_edit,
+                cascading_delete) values (?, ?, ?, ?, ?, ?)""",
+                (table_id,
+                 constraint.kind,
+                 list(constraint.kind).pop(0),
+                 self.table_id_dict.get(constraint.reference),
+                 constraint.if_prop_exists("has_value_edit"),
+                 constraint.if_prop_exists("cascading_delete")
+                 )
+            )
+            field_id = self.cursor.lastrowid
+            self.cursor.execute(
+                """insert into dbd$constraint_details (
+                constraint_id,
+                position,
+                field_id) values (?, ?, ?)""",
+                (field_id,
+                 constraint.position,
+                 self.field_of_table_id_dict.get(constraint.items)
+                 )
+            )

@@ -15,28 +15,28 @@ class Table:
     means = None
 
     def __init__(self, name):
-        self.name = name
         self.fields = {}
         self.constraints = []
         self.indices = []
-        self.parametersOrder = []
-        if (self.name is not None) | (self.name != ""):
+        self.parameters_order = []
+        if (name is not None) & (name != ""):
+            self.name = name
             self.parameters_order.append("name")
         #self.constraints_order = []
         #self.fieldsOrder = []
         #self.indicesOrder = []
 
     def set_name(self, name):
-        self.name = name
-        if (self.name is not None) | (self.name != ""):
+        if (name is not None) & (name != ""):
+            self.name = name
             self.parameters_order.append("name")
 
     def get_name(self):
         return self.name
 
     def set_description(self, description):
-        self.description = description
-        if (self.description is not None) | (self.description != ""):
+        if (description is not None) & (description != ""):
+            self.description = description
             self.parameters_order.append("description")
 
     def get_description(self):
@@ -46,7 +46,7 @@ class Table:
         props_temp = []
         for prop in props.split(","):
             props_temp.append(prop.strip())
-        if (props_temp is not None) | (len(props_temp) != 0):
+        if (props_temp is not None) & (len(props_temp) != 0):
             self.parameters_order.append("props")
         self.props = set(props_temp)
 
@@ -60,15 +60,15 @@ class Table:
             return False
 
     def set_ht_table_flags(self, ht_table_flags ):
-        self.ht_table_flags = ht_table_flags
-        if (self.ht_table_flags is not None) | (self.ht_table_flags != ""):
-            self.parametersOrder.append("ht_table_flags ")
+        if (ht_table_flags is not None) & (ht_table_flags != ""):
+            self.ht_table_flags = ht_table_flags
+            self.parameters_order.append("ht_table_flags ")
 
     def get_ht_table_flags(self):
         return self.ht_table_flags
 
     def set_access_level(self, access_level):
-        if (access_level is not None) | (access_level != ""):
+        if (access_level is not None) & (access_level != ""):
             self.access_level = int(access_level)
             self.parameters_order.append("access_level")
 

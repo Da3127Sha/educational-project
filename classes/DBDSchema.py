@@ -10,42 +10,42 @@ class DBDSchema:
     tables = None  # dictionary of Table type objects
 
     def __init__(self, fulltext_engine):
-        self.fulltext_engine = fulltext_engine
         self.domains = {}
         self.tables = {}
         self.parameters_order = []
-        if (self.fulltext_engine is not None) | (self.fulltext_engine != ""):
+        if (fulltext_engine is not None) & (fulltext_engine != ""):
+            self.fulltext_engine = fulltext_engine
             self.parameters_order.append("fulltext_engine")
         self.tables_order = []
         self.domains_order = []
 
     def set_fulltext_engine(self, fulltext_engine):
-        self.fulltext_engine = fulltext_engine
-        if (self.fulltext_engine is not None) | (self.fulltext_engine != ""):
+        if (fulltext_engine is not None) & (fulltext_engine != ""):
+            self.fulltext_engine = fulltext_engine
             self.parameters_order.append("fulltext_engine")
 
     def get_fulltext_engine(self):
         return self.fulltext_engine
 
     def set_version(self, version):
-        self.version = version
-        if (self.version is not None) | (self.version != ""):
+        if (version is not None) & (version != ""):
+            self.version = version
             self.parameters_order.append("version")
 
     def get_version(self):
         return self.version
 
     def set_name(self, name):
-        self.name = name
-        if (self.name is not None) | (self.name != ""):
+        if (name is not None) & (name != ""):
+            self.name = name
             self.parameters_order.append("name")
 
     def get_name(self):
         return self.name
 
     def set_description(self, description):
-        self.description = description
-        if (self.description is not None) | (self.description != ""):
+        if (description is not None) & (description != ""):
+            self.description = description
             self.parameters_order.append("description")
 
     def get_description(self):

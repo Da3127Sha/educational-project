@@ -13,31 +13,31 @@ class Domain:
 
     def __init__(self, name, type):
         self.parameters_order = []
-        self.name = name
-        if (self.name is not None) | (self.name != ""):
+        if (name is not None) & (name != ""):
+            self.name = name
             self.parameters_order.append("name")
-        self.type = type
-        if (self.type is not None) | (self.type != ""):
+        if (type is not None) & (type != ""):
+            self.type = type
             self.parameters_order.append("type")
 
     def set_name(self, name):
-        self.name = name
-        if (self.name is not None) | (self.name != ""):
+        if (name is not None) & (name != ""):
+            self.name = name
             self.parameters_order.append("name")
 
     def get_name(self):
         return self.name
 
     def set_type(self, type):
-        self.type = type
-        if (self.type is not None) | (self.type != ""):
+        if (type is not None) & (type != ""):
+            self.type = type
             self.parameters_order.append("type")
 
     def get_type(self):
         return self.type
 
     def set_align(self, align):
-        if (self.align is not None) | (self.align != ""):
+        if (align is not None) & (align != ""):
             self.align = list(align).pop(0)
             self.parameters_order.append("align")
 
@@ -45,7 +45,7 @@ class Domain:
         return self.align
 
     def set_width(self, width):
-        if (self.width is not None) | (self.width != ""):
+        if (width is not None) & (width != ""):
             self.width = int(width)
             self.parameters_order.append("width")
 
@@ -53,7 +53,7 @@ class Domain:
         return self.width
 
     def set_char_length(self, char_length):
-        if (self.char_length is not None) | (self.char_length != ""):
+        if (char_length is not None) & (char_length != ""):
             self.char_length = int(char_length)
             self.parameters_order.append("char_length")
 
@@ -61,8 +61,8 @@ class Domain:
         return self.char_length
 
     def set_description(self, description):
-        self.description = description
-        if (self.description is not None) | (self.description != ""):
+        if (description is not None) & (description != ""):
+            self.description = description
             self.parameters_order.append("description")
 
     def get_description(self):
@@ -72,7 +72,7 @@ class Domain:
         props_temp = []
         for prop in props.split(","):
             props_temp.append(prop.strip())
-        if (props_temp is not None) | (len(props_temp) != 0):
+        if (props_temp is not None) & (len(props_temp) != 0):
             self.parameters_order.append("props")
         self.props = set(props_temp)
 
@@ -86,7 +86,7 @@ class Domain:
             return False
 
     def set_precision(self, precision):
-        if (self.precision is not None) | (self.precision != ""):
+        if (precision is not None) & (precision != ""):
             self.precision = int(precision)
             self.parameters_order.append("precision")
 
@@ -94,7 +94,7 @@ class Domain:
         return self.precision
 
     def set_scale(self, scale):
-        if (self.scale is not None) | (self.scale != ""):
+        if (scale is not None) & (scale != ""):
             self.scale = int(scale)
             self.parameters_order.append("scale")
 
@@ -102,7 +102,7 @@ class Domain:
         return self.scale
 
     def set_length(self, length):
-        if (self.length is not None) | (self.length != ""):
+        if (length is not None) & (length != ""):
             self.length = int(length)
             self.parameters_order.append("length")
 

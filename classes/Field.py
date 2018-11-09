@@ -9,14 +9,14 @@ class Field:
 
     def __init__(self, name, position):
         self.parameters_order = []
-        if (self.name is not None) | (self.name != ""):
+        if (name is not None) & (name != ""):
             self.name = name
             self.parameters_order.append("name")
-        if (self.position is not None) | (self.position != ""):
+        if (position is not None) & (position != ""):
             self.position = int(position)
 
     def set_name(self, name):
-        if (self.name is not None) | (self.name != ""):
+        if (name is not None) & (name != ""):
             self.name = name
             self.parameters_order.append("name")
 
@@ -24,7 +24,7 @@ class Field:
         return self.name
 
     def set_rname(self, rname):
-        if (self.rname is not None) | (self.rname != ""):
+        if (rname is not None) & (rname != ""):
             self.rname = rname
             self.parameters_order.append("rname")
 
@@ -32,7 +32,7 @@ class Field:
         return self.rname
 
     def set_domain(self, domain):
-        if (self.domain is not None) | (self.domain != ""):
+        if (domain is not None) & (domain != ""):
             self.domain = domain
             self.parameters_order.append("domain")
 
@@ -43,7 +43,7 @@ class Field:
         props_temp = []
         for prop in props.split(","):
             props_temp.append(prop.strip())
-        if (props_temp is not None) | (len(props_temp) != 0):
+        if (props_temp is not None) & (len(props_temp) != 0):
             self.parameters_order.append("props")
         self.props = set(props_temp)
 
@@ -57,8 +57,8 @@ class Field:
             return False
 
     def set_description(self, description):
-        self.description = description
-        if (self.description is not None) | (self.description != ""):
+        if (description is not None) & (description != ""):
+            self.description = description
             self.parameters_order.append("description")
 
     def get_description(self):
