@@ -79,9 +79,9 @@ class DBInitializer:
     def create_tables_table(self):
         self.cursor.execute(
             """create table dbd$tables (
-               id integer primary key autoincrement default(null),
-               schema_id integer default(null),      -- идетификатор схемы (dbd$schemas)
-               name varchar unique,                  -- имя таблицы
+               id integer primary key autoincrement not null,
+               schema_id integer not null,      -- идетификатор схемы (dbd$schemas)
+               name varchar,                  -- имя таблицы
                description varchar default(null),    -- описание
                can_add boolean default(null),        -- разрешено ли добавление в таблицу
                can_edit boolean default(null),       -- разрешено ли редактирование  таблице?
