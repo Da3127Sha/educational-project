@@ -33,7 +33,11 @@ class Field:
 
     def set_domain(self, domain):
         if (domain is not None) & (domain != ""):
-            self.domain = domain
+            self.domain = domain.replace(" ", "_").\
+                replace("\\", "_")\
+                .replace("-", "_").\
+                replace(".", "").\
+                replace("/", "_")
             self.parameters_order.append("domain")
 
     def get_domain(self):
