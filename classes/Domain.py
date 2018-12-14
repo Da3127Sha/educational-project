@@ -14,7 +14,11 @@ class Domain:
     def __init__(self, name, type):
         self.parameters_order = []
         if (name is not None) & (name != ""):
-            self.name = name
+            self.name = name.replace(" ", "_").\
+                replace("\\", "_")\
+                .replace("-", "_").\
+                replace(".", "").\
+                replace("/", "_")
             self.parameters_order.append("name")
         if (type is not None) & (type != ""):
             self.type = type
@@ -22,7 +26,11 @@ class Domain:
 
     def set_name(self, name):
         if (name is not None) & (name != ""):
-            self.name = name
+            self.name = name.replace(" ", "_").\
+                replace("\\", "_")\
+                .replace("-", "_").\
+                replace(".", "").\
+                replace("/", "_")
             self.parameters_order.append("name")
 
     def get_name(self):
