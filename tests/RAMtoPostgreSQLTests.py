@@ -13,8 +13,10 @@ print(schemas[1].get_table("CASCDEL").get_field("KodKaskad").get_rname())
 print(schemas[0].get_fulltext_engine())
 print(schemas[1].get_fulltext_engine())
 
-ddl_generator = DDLPostgreSQLGenerator()
-ddl_generator.generate_DDL(schemas[0])
+ddl_generator_1 = DDLPostgreSQLGenerator()
+ddl_generator_1.generate_DDL(schemas[0])
+ddl_generator_2 = DDLPostgreSQLGenerator()
+ddl_generator_2.generate_DDL(schemas[1])
 
 
 

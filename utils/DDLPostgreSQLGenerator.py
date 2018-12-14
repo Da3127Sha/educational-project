@@ -23,12 +23,14 @@ class DDLPostgreSQLGenerator:
 
     def generate_DDL(self, schema):
         try:
+            # TODO: add checking if exists
             self.create_schema(schema.get_name())
             self.prefix = schema.get_name() + "."
             self.create_domains(schema.get_domains().values())
             self.create_tables(schema.get_tables().values())
             self.create_foreign_keys(schema)
             self.create_indices(schema.get_tables().values())
+            self.connection.commit()
         except (Exception) as error:
             print("Error while connecting to PostgreSQL", error)
         finally:

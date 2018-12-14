@@ -16,7 +16,9 @@ Educational project for collective application development
     + `XmlParser.py` - contains function `create_list_of_objects_from_xml` which creates classes from xml description
     + `DBInitializer.py` - class, which contains functions for database initialization
     + `RAMToDBDConverter.py` - contains functions for inserting into database tables
+    + `DDLPostgreSQLGenerator.py` - class, which contains functions for PostgreSQL ddl generation
 + tests
-    + `RAMToDBDTests.py` - tests of RAM to DBD
-    + `XMLToRAMTests.py` - tests of XML to RAM
+    + `RAMToDBDTests.py` - test application of RAM to DBD
+    + `XMLToRAMTests.py` - test application of XML to RAM
+    + `RAMtoPostgreSQLTests.py` - test application of RAM to PostgreSQL
 + `MainApplication.py` - main application

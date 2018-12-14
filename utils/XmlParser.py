@@ -20,11 +20,7 @@ def create_list_of_objects_from_xml(paths):
         xml_domains = doc.getElementsByTagName("domain")
         for xml_domain in xml_domains:
             domain_name = xml_domain.getAttribute("name")
-            not_in_other_schemas = True
-            for s in schemas:
-                if (s.get_domain(domain_name) is not None):
-                   not_in_other_schemas = False
-            if ((schema.get_domain(domain_name) is None) & (not_in_other_schemas)):
+            if (schema.get_domain(domain_name) is None):
                 domain = Domain(domain_name,
                                 xml_domain.getAttribute("type"))
                 domain.set_align(xml_domain.getAttribute("align"))
