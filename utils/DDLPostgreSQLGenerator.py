@@ -2,7 +2,7 @@ import psycopg2
 from psycopg2 import sql
 from classes.DBDSchema import DBDSchema
 
-USERNAME = "postgres";
+USERNAME = "postgres"
 
 
 class DDLPostgreSQLGenerator:
@@ -23,14 +23,15 @@ class DDLPostgreSQLGenerator:
 
     def generate_DDL(self, schema):
         try:
-            # TODO: add checking if exists
-            self.create_schema(schema.get_name())
-            self.prefix = schema.get_name() + "."
-            self.create_domains(schema.get_domains().values())
-            self.create_tables(schema.get_tables().values())
-            self.create_foreign_keys(schema)
-            self.create_indices(schema.get_tables().values())
-            self.connection.commit()
+            if (self.schema_exists(schema.get_name())):
+                self.create_schema(schema.get_name())
+                self.prefix = schema.get_name() + "."
+                self.create_domains(schema.get_domains().values())
+                self.create_tables(schema.get_tables().values())
+                self.create_foreign_keys(schema)
+                self.create_indices(schema.get_tables().values())
+                self.connection.commit()
+            else: print("Схема существует")
         except (Exception) as error:
             print("Error while connecting to PostgreSQL", error)
         finally:
@@ -46,7 +47,6 @@ class DDLPostgreSQLGenerator:
                                             user=USERNAME)))
         print("Создали схему " + schema_name)
 
-    # TODO: add properties, width, length, etc...
     def create_domains(self, domains):
         for domain in domains:
             if ((domain.type.lower() == "blob") or
@@ -61,14 +61,18 @@ class DDLPostgreSQLGenerator:
             elif (domain.type.lower() == "memo"):
                 domain_type = "text"
             else:
-                domain_type = domain.type
+                domain_type = domain.type.lower()
+
+            if ((domain_type.lower() == "varchar") and (
+                    (domain.char_length is not None) and
+                    (domain.char_length != ""))):
+                domain_type = domain_type + "(" \
+                              + str(domain.char_length) + ")"
             self.cursor.execute(
                 sql.SQL("""CREATE DOMAIN {name} AS {type}"""
                         .format(name=self.prefix + domain.name,
                                 type=domain_type)))
-            print("домен " + domain.name)
 
-    # TODO: add properties, etc...
     def create_tables(self, tables):
         for table in tables:
             query = """CREATE TABLE {name} (""" \
@@ -77,7 +81,6 @@ class DDLPostgreSQLGenerator:
             for constraint in table.get_constraints():
                 if (constraint.kind.lower() == "primary"):
                     pk = constraint.items
-                    print("pk " + pk)
             step = 0
             for field in table.get_fields().values():
                 if (step != 0):
@@ -91,14 +94,9 @@ class DDLPostgreSQLGenerator:
             query = query + ")"
             self.cursor.execute(sql.SQL(query))
 
-    # TODO: add properties, etc...
     def create_foreign_keys(self, schema):
-        # i = 0
         for table in schema.get_tables().values():
-            # fk = "f" + str(i)
-            # j = 0
             for constraint in table.get_constraints():
-                # fk = fk + str(j)
                 if (constraint.kind.lower() != "primary"):
                     query = """ALTER TABLE {name} """ \
                         .format(name=self.prefix + table.name)
@@ -113,8 +111,6 @@ class DDLPostgreSQLGenerator:
                             (constraint.if_prop_exists("cascading_delete".lower()))):
                         query = query + "ON DELETE CASCADE"
                     self.cursor.execute(sql.SQL(query))
-                    # j += 1
-            # i += 1
 
     def get_parent_pk(self, reference, schema):
         pk = ""
@@ -123,7 +119,6 @@ class DDLPostgreSQLGenerator:
                 pk = constraint.items
         return pk
 
-    # TODO: add properties
     def create_indices(self, tables):
         for table in tables:
             for index in table.get_indices():
@@ -137,3 +132,13 @@ class DDLPostgreSQLGenerator:
                             .format(table_name=self.prefix + table.name,
                                     column_name=index.field_name)
                 self.cursor.execute(sql.SQL(query))
+
+    def schema_exists(self, name):
+        self.cursor.execute(
+            sql.SQL("""SELECT schema_name FROM information_schema.schemata """ +
+                   """WHERE schema_name = '""" + name.lower() + "'"))
+        temp_name = self.cursor.fetchone()
+        if (self.cursor.fetchone() is not None):
+            return False
+        else:
+            return True

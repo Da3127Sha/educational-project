@@ -11,7 +11,11 @@ class Domain:
     scale = None
     length = None
 
-    def __init__(self, name, type):
+    unnamed = None
+    position_for_unnamed = None  # list of 2 elements: 0 - table name, 1 - field name
+
+    def __init__(self, name, type, unnamed):
+        self.unnamed = unnamed
         self.parameters_order = []
         if (name is not None) & (name != ""):
             self.name = name.replace(" ", "_").\
@@ -23,6 +27,11 @@ class Domain:
         if (type is not None) & (type != ""):
             self.type = type
             self.parameters_order.append("type")
+
+    def set_position_for_unnamed(self, table_name, field_name):
+        self.position_for_unnamed = []
+        self.position_for_unnamed.append(table_name)
+        self.position_for_unnamed.append(field_name)
 
     def set_name(self, name):
         if (name is not None) & (name != ""):
