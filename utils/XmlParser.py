@@ -22,7 +22,7 @@ def create_list_of_objects_from_xml(paths):
             domain_name = xml_domain.getAttribute("name")
             if (schema.get_domain(domain_name) is None):
                 domain = Domain(domain_name,
-                                xml_domain.getAttribute("type"))
+                                xml_domain.getAttribute("type"), False)
                 domain.set_align(xml_domain.getAttribute("align"))
                 domain.set_width(xml_domain.getAttribute("width"))
                 domain.set_char_length(xml_domain.getAttribute("char_length"))
@@ -46,7 +46,27 @@ def create_list_of_objects_from_xml(paths):
             for xml_field in xml_fields:
                 field = Field(xml_field.getAttribute("name"), position)
                 field.set_rname(xml_field.getAttribute("rname"))
-                field.set_domain(xml_field.getAttribute("domain"))
+
+                if ((xml_field.getAttribute("type") is not None) and
+                        (xml_field.getAttribute("type") != "")):
+                    domain = Domain("Unnamed_" + xml_table.getAttribute("name") +
+                                    "_" + xml_field.getAttribute("name"),
+                                    xml_field.getAttribute("type"), True)
+                    domain.set_position_for_unnamed(xml_table.getAttribute("name"),
+                                                    xml_field.getAttribute("name"))
+                    domain.set_align(xml_field.getAttribute("align"))
+                    domain.set_width(xml_field.getAttribute("width"))
+                    domain.set_char_length(xml_field.getAttribute("char_length"))
+                    domain.set_description(xml_field.getAttribute("description"))
+                    domain.set_props(xml_field.getAttribute("type_props"))
+                    domain.set_precision(xml_field.getAttribute("precision"))
+                    domain.set_length(xml_field.getAttribute("length"))
+                    domain.set_scale(xml_field.getAttribute("scale"))
+                    schema.set_domain(domain.name, domain)
+                    field.set_domain(domain.name)
+                else:
+                    field.set_domain(xml_field.getAttribute("domain"))
+
                 field.set_props(xml_field.getAttribute("props"))
                 table.set_field(field.name, field)
                 position += 1
