@@ -54,7 +54,9 @@ class DDLPostgreSQLGenerator:
                 domain_type = "bytea"
             elif ((domain.type.lower() == "string") or
                   ((domain.type.lower() == "word")) or
-                  ((domain.type.lower() == "code"))):
+                  ((domain.type.lower() == "code")) or
+                  ((domain.type.lower() == "nvarchar")) or
+                  ((domain.type.lower() == "ntext"))):
                 domain_type = "varchar"
             elif (domain.type.lower() == "largeint"):
                 domain_type = "bigint"
@@ -77,10 +79,10 @@ class DDLPostgreSQLGenerator:
         for table in tables:
             query = """CREATE TABLE {name} (""" \
                 .format(name=self.prefix + table.name)
-            pk = ""
+            pk = []
             for constraint in table.get_constraints():
                 if (constraint.kind.lower() == "primary"):
-                    pk = constraint.items
+                    pk.append(constraint.items)
             step = 0
             for field in table.get_fields().values():
                 if (step != 0):
@@ -88,7 +90,7 @@ class DDLPostgreSQLGenerator:
                 query = query + """{field_name} {domain}""" \
                     .format(field_name=field.name,
                             domain=self.prefix + field.domain)
-                if (field.name == pk):
+                if (pk.count(field.name) > 0):  # composite pk support
                     query = query + " PRIMARY KEY"
                 step += 1
             query = query + ")"

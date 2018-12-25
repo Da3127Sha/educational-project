@@ -5,6 +5,7 @@ class Constraint:
     reference = None  # table name
     props = None
     position = None
+    name = None
 
     def __init__(self, kind, position):
         self.parameters_order = []
@@ -19,9 +20,16 @@ class Constraint:
             self.kind = kind
             self.parameters_order.append("kind")
 
-
     def getKind(self):
         return self.kind
+
+    def set_name(self, name):
+        if (name is not None) & (name != ""):
+            self.name = name
+            self.parameters_order.append("name")
+
+    def get_name(self):
+        return self.name
 
     def set_reference(self, reference):
         if (reference is not None) & (reference != ""):
