@@ -31,45 +31,68 @@ class MSSQLMetadataGetter:
                 tables = []
                 for t in self.cursor.tables(schema=schema_name, tableType='TABLE'):
                     if (t.table_name != "sysdiagrams"):  # exclude system table
-                        print("table " + t.table_name)
-                        table = Table(t.table_name)
+                        table = Table(t.table_name.replace(" ", "_"))
                         table.set_description(t.remarks)
                         tables.append(table)
-                        # TODO: props and flags
 
-                print("-------------------------")
                 for table in tables:
-                    print("table " + table.name)
                     for column in self.cursor.columns(schema=schema_name):
-                        if (column.table_name == table.name):
-                            #print("column " + column.column_name)
+                        if (column.table_name.replace(" ", "_") == table.name):
                             field = Field(column.column_name, column.ordinal_position)
                             field.set_description(column.remarks)
-                            # TODO: field and domain props
+
                             domain_name = "Unnamed_" + table.name + "_" + field.name
                             domain = Domain(domain_name, column.type_name, True)
-                            domain.set_char_length(column.column_size)
+                            if ((domain.type == "nvarchar") or (domain.type == "ntext")):
+                                domain.set_char_length(column.column_size)
+                            domain.set_width(column.column_size)
                             domain.set_position_for_unnamed(table.name, field.name)
-                            #print("type name " + str(column.type_name))
-                            #print("type length " + str(column.column_size))
                             field.set_domain(domain.name)
                             schema.set_domain(domain.name, domain)
 
                             table.set_field(field.name, field)
 
-                    for pk in self.cursor.primaryKeys(schema=schema_name, table=table.name):
-                        primary_key = Constraint("PRIMARY", 1)
+                    firstly_met = True
+                    i = 1
+                    for pk in self.cursor.primaryKeys(schema=schema_name, table=table.name.replace("_", " ")):
+                        primary_key = Constraint("PRIMARY", i)
+                        if (firstly_met):
+                            primary_key.set_name(pk.pk_name)
+                            firstly_met = False
+                        else:  # Add postfix to composite pk name
+                            primary_key.set_name(pk.pk_name + "_Reiteration_" + str(i))
+                            i += 1
                         primary_key.set_items(pk.column_name)
-                        primary_key.set_name(pk.pk_name)
-                        print("pk " + pk.pk_name)
-                        print("pk col " + pk.column_name)
                         table.set_constraint(primary_key)
 
-                    # TODO: fk and indices
+                    for ind in self.cursor.statistics(schema=schema_name, table=table.name.replace("_", " ")):
+                        if (ind.index_name is not None):
+                            index = Index(ind.column_name, ind.ordinal_position)
+                            if (ind.non_unique == 0):
+                                index.set_props("uniqueness")
 
+                            table.set_index(index)
                     schema.set_table(table)
 
-
+                for table in tables:
+                    i = 0
+                    for pk in schema.get_table(table.name).get_constraints():
+                        if (pk.kind == "PRIMARY"):
+                            i += 1
+                    for fk in self.cursor.foreignKeys(schema=schema_name, table=table.name):
+                        foreign_key = Constraint("FOREIGN", i)
+                        foreign_key.set_reference(table.name)
+                        foreign_key.set_name(fk.fk_name)
+                        foreign_key.set_items(fk.fkcolumn_name)
+                        if (fk.delete_rule == 1):
+                            foreign_key.set_props("cascading_delete")
+                        temp_table = schema.get_table(fk.fktable_name.replace(" ", "_"))
+                        temp_table.set_constraint(foreign_key)
+                        schema.set_table(temp_table)
+                        i += 1
+                return schema
+            else:
+                return None
         except (Exception) as error:
             print("Error while connecting to MS SQL", error)
         finally:
