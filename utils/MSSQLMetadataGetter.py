@@ -65,13 +65,26 @@ class MSSQLMetadataGetter:
                         primary_key.set_items(pk.column_name)
                         table.set_constraint(primary_key)
 
+                    names = []
+                    inds = {}
                     for ind in self.cursor.statistics(schema=schema_name, table=table.name.replace("_", " ")):
                         if (ind.index_name is not None):
-                            index = Index(ind.column_name, ind.ordinal_position)
-                            if (ind.non_unique == 0):
-                                index.set_props("uniqueness")
+                            if (names.count(ind.index_name) == 0):
+                                index = Index(ind.column_name, ind.ordinal_position)
+                                index.set_name(ind.index_name)
+                                names.append(index.name)
+                                if (ind.non_unique == 0):
+                                    index.set_props("uniqueness")
+                                inds[ind.index_name] = index
+                                names.append(index.name)
+                            else:
+                                temp = inds[ind.index_name]
+                                temp.set_field_name(temp.field_name + ", " + ind.column_name)
+                                inds[ind.index_name] = temp
 
-                            table.set_index(index)
+                    for index in inds.values():
+                        table.set_index(index)
+
                     schema.set_table(table)
 
                 for table in tables:
