@@ -2,6 +2,7 @@ class Index:
     field_name = None # field name
     props = None
     position = None
+    name = None
 
     def __init__(self, field_name, position):
         if (field_name is not None) & (field_name != ""):
@@ -16,6 +17,13 @@ class Index:
     def get_field_name(self):
         return self.field_name
 
+    def set_name(self, name):
+        if (name is not None) & (name != ""):
+            self.name = name
+
+    def get_name(self):
+        return self.name
+
     def set_props(self, props):
         props_temp = []
         for prop in props.split(","):
@@ -26,7 +34,7 @@ class Index:
         return self.props
 
     def if_prop_exists(self, prop):
-        if (prop in self.props):
+        if ((self.props is not None) and (prop in self.props)):
             return True
         else:
             return False

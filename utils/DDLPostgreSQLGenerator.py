@@ -9,6 +9,7 @@ class DDLPostgreSQLGenerator:
     connection = None
     cursor = None
     prefix = None
+    query = ""
 
     def __init__(self):
         try:
@@ -30,7 +31,14 @@ class DDLPostgreSQLGenerator:
                 self.create_tables(schema.get_tables().values())
                 self.create_foreign_keys(schema)
                 self.create_indices(schema.get_tables().values())
-                self.connection.commit()
+
+                print(self.query)
+                ddl_file = open('../resources/DDL.txt', 'w')
+                ddl_file.write(self.query)
+                ddl_file.close()
+                ddl_file = open('../resources/DDL.txt', 'r')
+                self.execute_ddl(ddl_file)
+                ddl_file.close()
             else: print("Схема существует")
         except (Exception) as error:
             print("Error while connecting to PostgreSQL", error)
@@ -40,12 +48,17 @@ class DDLPostgreSQLGenerator:
                 self.connection.close()
                 print("PostgreSQL connection is closed")
 
+
+    def execute_ddl(self, ddl_file):
+        for query in ddl_file:
+            self.cursor.execute(sql.SQL(query))
+            self.connection.commit()
+
     def create_schema(self, schema_name):
-        self.cursor.execute(sql.SQL("""CREATE SCHEMA {name}
-                                    AUTHORIZATION {user}"""
-                                    .format(name=schema_name,
-                                            user=USERNAME)))
-        print("Создали схему " + schema_name)
+        self.query += """CREATE SCHEMA {name} AUTHORIZATION {user}"""\
+            .format(name=schema_name,
+                    user=USERNAME)
+        self.query += ";\n"
 
     def create_domains(self, domains):
         for domain in domains:
@@ -56,11 +69,19 @@ class DDLPostgreSQLGenerator:
                   ((domain.type.lower() == "word")) or
                   ((domain.type.lower() == "code")) or
                   ((domain.type.lower() == "nvarchar")) or
-                  ((domain.type.lower() == "ntext"))):
+                  ((domain.type.lower() == "nchar"))):
                 domain_type = "varchar"
             elif (domain.type.lower() == "largeint"):
                 domain_type = "bigint"
-            elif (domain.type.lower() == "memo"):
+            elif (domain.type.lower() == "bit"):
+                domain_type = "boolean"
+            elif (domain.type.lower() == "datetime"):
+                domain_type = "varchar"
+            elif (domain.type.lower() == "int identity"):
+                domain_type = "int"
+            elif ((domain.type.lower() == "memo") or
+                  ((domain.type.lower() == "ntext")) or
+                  ((domain.type.lower() == "image"))):
                 domain_type = "text"
             else:
                 domain_type = domain.type.lower()
@@ -70,10 +91,10 @@ class DDLPostgreSQLGenerator:
                     (domain.char_length != ""))):
                 domain_type = domain_type + "(" \
                               + str(domain.char_length) + ")"
-            self.cursor.execute(
-                sql.SQL("""CREATE DOMAIN {name} AS {type}"""
-                        .format(name=self.prefix + domain.name,
-                                type=domain_type)))
+            self.query += """CREATE DOMAIN {name} AS {type}"""\
+                    .format(name=self.prefix + domain.name,
+                                type=domain_type)
+            self.query += ";\n"
 
     def create_tables(self, tables):
         for table in tables:
@@ -83,6 +104,9 @@ class DDLPostgreSQLGenerator:
             for constraint in table.get_constraints():
                 if (constraint.kind.lower() == "primary"):
                     pk.append(constraint.items)
+
+            print(pk)
+
             step = 0
             for field in table.get_fields().values():
                 if (step != 0):
@@ -90,11 +114,22 @@ class DDLPostgreSQLGenerator:
                 query = query + """{field_name} {domain}""" \
                     .format(field_name=field.name,
                             domain=self.prefix + field.domain)
-                if (pk.count(field.name) > 0):  # composite pk support
-                    query = query + " PRIMARY KEY"
+                #if (pk.count(field.name) > 0):
+                 #   query += " UNIQUE"
                 step += 1
-            query = query + ")"
-            self.cursor.execute(sql.SQL(query))
+
+            query = query + ", PRIMARY KEY("
+            first = True
+            for field in table.get_fields().values():
+                if (pk.count(field.name) > 0):  # composite pk support
+                    if (first):
+                        query = query + field.name
+                        first = False
+                    else:
+                        query = query + ", " + field.name
+
+            query = query + ") DEFERRABLE)"
+            self.query += query + ";\n"
 
     def create_foreign_keys(self, schema):
         for table in schema.get_tables().values():
@@ -111,8 +146,8 @@ class DDLPostgreSQLGenerator:
                                                                      schema))
                     if ((constraint.if_prop_exists("full_cascading_delete".lower())) or
                             (constraint.if_prop_exists("cascading_delete".lower()))):
-                        query = query + "ON DELETE CASCADE"
-                    self.cursor.execute(sql.SQL(query))
+                        query = query + " ON DELETE CASCADE"
+                    self.query += query + " DEFERRABLE;\n"
 
     def get_parent_pk(self, reference, schema):
         pk = ""
@@ -123,17 +158,18 @@ class DDLPostgreSQLGenerator:
 
     def create_indices(self, tables):
         for table in tables:
-            for index in table.get_indices():
-                query = "CREATE "
-                if (index.if_prop_exists("uniqueness".lower())):
-                    query = query + "UNIQUE "
-                query = query + "INDEX {name} " \
-                    .format(name=self.prefix.replace(".", "_") +
-                                 table.name + "_" + index.field_name) + \
-                        "ON {table_name} ({column_name}) " \
-                            .format(table_name=self.prefix + table.name,
-                                    column_name=index.field_name)
-                self.cursor.execute(sql.SQL(query))
+            if (len(table.get_indices()) > 0):
+                for index in table.get_indices():
+                    query = "CREATE "
+                    if (index.if_prop_exists("uniqueness".lower())):
+                        query = query + "UNIQUE "
+                    query = query + "INDEX {name} " \
+                        .format(name=self.prefix.replace(".", "_") +
+                                    index.name + "_" + table.name) + \
+                            "ON {table_name} ({column_name}) " \
+                                .format(table_name=self.prefix + table.name,
+                                        column_name=index.field_name)
+                    self.query += query + ";\n"
 
     def schema_exists(self, name):
         self.cursor.execute(
