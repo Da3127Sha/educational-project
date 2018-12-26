@@ -23,4 +23,4 @@ Educational project for collective application development
     + `XMLToRAMTests.py` - test application of XML to RAM
     + `RAMtoPostgreSQLTests.py` - test application of RAM to PostgreSQL
     + `MSSQLMetadataGetTests.py` - test application of getting metadata from MS SQL to RAM
-+ `MainApplication.py` - main application
++ `MainApplication.py` - in this application performed XML conversation to RAM
