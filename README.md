@@ -18,9 +18,13 @@ Educational project for collective application development
     + `RAMToDBDConverter.py` - contains functions for inserting into database tables
     + `DDLPostgreSQLGenerator.py` - class, which contains functions for PostgreSQL ddl generation
     + `MSSQLMetadataGetter.py` - class, which contains functions for getting metadata from MS SQL to RAM
+    + `MSSQLToPostgreSQL.py` - transaction data transfer from ms sql to postgresql
+    + `RAMToXDBConverter.py` - contains functions for inserting into database tables
 + tests
     + `RAMToDBDTests.py` - test application of RAM to DBD
     + `XMLToRAMTests.py` - test application of XML to RAM
     + `RAMtoPostgreSQLTests.py` - test application of RAM to PostgreSQL
     + `MSSQLMetadataGetTests.py` - test application of getting metadata from MS SQL to RAM
+    + `MSSQLToPostgreSQL.py` - test transaction data transfer from ms sql to postgresql
+    + `RAMToXDBTests.py` - test application of RAM to XDB
 + `MainApplication.py` - main application
