@@ -1,5 +1,5 @@
 class Index:
-    field_name = None # field name
+    field_name = None  # field name
     props = None
     position = None
     name = None
@@ -28,6 +28,11 @@ class Index:
         props_temp = []
         for prop in props.split(","):
             props_temp.append(prop.strip())
+        props_temp_set = set(props_temp)
+        props_temp.clear()
+        for p in props_temp_set:
+            if not (p == ""):
+                props_temp.append(p)
         self.props = set(props_temp)
 
     def get_props(self):

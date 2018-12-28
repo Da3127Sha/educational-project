@@ -1,4 +1,5 @@
 from utils.MSSQLMetadataGetter import *
+from utils.RAMtoXDBConverter import RAMToXDBConverter
 
 SCHEMA = "dbo"
 
@@ -22,3 +23,7 @@ if (schema is not None):
                 print("     Ссылается на таблицу: " + co.reference)
         for i in t.get_indices():
             print("Индекс на поле : " + i.field_name)
+
+converter = RAMToXDBConverter(schema)
+schema_xml = converter.create_schema(schema)
+print(schema_xml)

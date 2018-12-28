@@ -53,7 +53,7 @@ class DBInitializer:
         self.cursor.execute(
             """create table dbd$domains (
                id  integer primary key autoincrement not null,
-               name varchar unique default(null),  -- имя домена
+               name varchar default(null),  -- имя домена
                description varchar default(null),  -- описание
                data_type_id integer not null,      -- идентификатор типа (dbd$data_types)
                length integer default(null),       -- длина

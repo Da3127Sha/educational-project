@@ -48,6 +48,11 @@ class Table:
             props_temp.append(prop.strip())
         if (props_temp is not None) & (len(props_temp) != 0):
             self.parameters_order.append("props")
+        props_temp_set = set(props_temp)
+        props_temp.clear()
+        for p in props_temp_set:
+            if not (p == ""):
+                props_temp.append(p)
         self.props = set(props_temp)
 
     def get_props(self):
@@ -62,7 +67,7 @@ class Table:
     def set_ht_table_flags(self, ht_table_flags ):
         if (ht_table_flags is not None) & (ht_table_flags != ""):
             self.ht_table_flags = ht_table_flags
-            self.parameters_order.append("ht_table_flags ")
+            self.parameters_order.append("ht_table_flags")
 
     def get_ht_table_flags(self):
         return self.ht_table_flags
@@ -99,3 +104,19 @@ class Table:
 
     def get_indices(self):
         return self.indices
+
+    def set_means(self, means):
+        if (means is not None) & (means != ""):
+            self.means = means
+            self.parameters_order.append("means")
+
+    def get_means(self):
+        return self.means
+
+    def set_temporal_mode(self, temporal_mode):
+        if (temporal_mode is not None) & (temporal_mode != ""):
+            self.temporal_mode = temporal_mode
+            self.parameters_order.append("temporal_mode")
+
+    def get_temporal_mode(self):
+        return self.temporal_mode

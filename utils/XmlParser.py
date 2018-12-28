@@ -15,7 +15,7 @@ def create_list_of_objects_from_xml(paths):
         schema = DBDSchema(xml_schema.getAttribute("fulltext_engine"))
         schema.set_version(xml_schema.getAttribute("version"))
         schema.set_name(xml_schema.getAttribute("name"))
-        schema.set_description("description")
+        schema.set_description(xml_schema.getAttribute("description"))
 
         xml_domains = doc.getElementsByTagName("domain")
         for xml_domain in xml_domains:
@@ -67,6 +67,7 @@ def create_list_of_objects_from_xml(paths):
                 else:
                     field.set_domain(xml_field.getAttribute("domain"))
 
+                field.set_description(xml_field.getAttribute("description"))
                 field.set_props(xml_field.getAttribute("props"))
                 table.set_field(field.name, field)
                 position += 1
