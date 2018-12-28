@@ -1,10 +1,11 @@
+from utils.RAMtoXDBConverter import RAMToXDBConverter
 from utils.XmlParser import *
 from utils.DBInitializer import *
 from utils.RAMToDBDConverter import *
 from utils.DBDtoRAMConverter import *
 import os
 
-DATABASE_NAME = "../database(1).db"
+DATABASE_NAME = "../database.db"
 XML_FILE_NAME_1 = "../resources/tasks.xml"
 XML_FILE_NAME_2 = "../resources/prjadm.xml"
 
@@ -19,6 +20,10 @@ if create:
 
 dbd_to_ram = DBDtoRAM(DATABASE_NAME)
 schema = dbd_to_ram.get_schema()
+schema = dbd_to_ram.get_schema()
 
-for domain in schema.domains:
-    print(str(domain.name) + ' ' + str(domain.description))
+
+
+converter = RAMToXDBConverter(schema)
+schema_xml = converter.create_schema(schema)
+print(schema_xml)
