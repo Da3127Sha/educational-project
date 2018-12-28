@@ -9,6 +9,9 @@ from classes.Index import Index
 
 
 class DBDtoRAM:
+    schema = None
+    table = None
+
     def __init__(self, db_name):
         self.connection = sqlite3.connect(db_name)
         self.connection.row_factory = sqlite3.Row
@@ -30,22 +33,21 @@ class DBDtoRAM:
             """).fetchone()
 
         schema_fulltext_engine = schema_result["fulltext_engine"]
-        schema = DBDSchema(schema_fulltext_engine)
-        schema.name = schema_result["name"]
-        schema.description = schema_result["description"]
-        schema.version = schema_result["version"]
+        self.schema = DBDSchema(schema_fulltext_engine)
+        self.schema.name = schema_result["name"]
+        self.schema.description = schema_result["description"]
+        self.schema.version = schema_result["version"]
 
-        schema.domains = self.get_domains()
-        schema.tables = self.get_tables()
+        self.get_domains()
+        self.get_tables()
 
         self.connection.commit()
         self.connection.close()
 
-        return schema
+        return self.schema
 
     def get_domains(self):
         cursor = self.connection.cursor()
-        domain_list = list()
         domain_attributes = cursor.execute("""select 
             name,
             description,
@@ -70,29 +72,50 @@ class DBDtoRAM:
                 select type_id
                 from dbd$data_types 
                 where dbd$data_types.id = ?""", (value["data_type_id"],)).fetchone()[0]
-            domain_unnamed = True
+            if (domain_name.lower().count("unnamed") > 0):
+                domain_unnamed = True
+            else:
+                domain_unnamed = False
             domain = Domain(domain_name, domain_type, domain_unnamed)
-            domain.name = value["name"]
-            domain.description = value["description"]
-            domain.length = value["length"]
-            domain.char_length = value["char_length"]
-            domain.precision = value["precision"]
-            domain.scale = value["scale"]
-            domain.width = value["width"]
-            domain.align = value["align"]
-            props = list()
-            props.append(value["show_null"])
-            props.append(value["show_lead_nulls"])
-            props.append(value["case_sensitive"])
-            props.append(value["summable"])
-            domain.props = props
-            domain_list.append(domain)
-
-        return domain_list
+            domain.set_name(value["name"])
+            domain.set_description(value["description"])
+            domain.set_length(value["length"])
+            domain.set_char_length(value["char_length"])
+            domain.set_precision(value["precision"])
+            domain.set_scale(value["scale"])
+            domain.set_width(value["width"])
+            domain.set_align(value["align"])
+            props = ""
+            first = True
+            if (value["show_null"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "show_null"
+            if (value["show_lead_nulls"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "show_lead_nulls"
+            if (value["case_sensitive"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "case_sensitive"
+            if (value["summable"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "summable"
+            domain.set_props(props)
+            self.schema.set_domain(domain.name, domain)
 
     def get_tables(self):
         cursor = self.connection.cursor()
-        tables_list = list()
 
         tables_attributes = cursor.execute("""\
             select
@@ -112,28 +135,44 @@ class DBDtoRAM:
             table_id = value["id"]
             table_name = value["name"]
             table = Table(table_name)
-            table.description = value["description"]
-            props = list()
-            props.append(value["can_add"])
-            props.append(value["can_edit"])
-            props.append(value["can_delete"])
-            table.props = props
-            table.ht_table_flags = value["ht_table_flags"]
-            table.access_level = value["access_level"]
-            table.temporal_mode = value["temporal_mode"]
-            table.means = value["means"]
+            table.set_description(value["description"])
+            props = ""
+            first = True
+            if (value["can_add"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "can_add"
+            if (value["can_edit"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "can_edit"
+            if (value["can_delete"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "can_delete"
+            table.set_props(props)
+            table.set_ht_table_flags(value["ht_table_flags"])
+            table.set_access_level(value["access_level"])
+            table.set_temporal_mode(value["temporal_mode"])
+            table.set_means(value["means"])
 
-            table.fields = self.get_fields(table_id)
-            table.constraints = self.get_constraints(table_id)
-            table.indices = self.get_indices(table_id)
+            self.table = table
+            self.get_fields(table_id)
+            self.get_constraints(table_id)
+            self.get_indices(table_id)
 
-            tables_list.append(table)
-
-        return tables_list
+            self.schema.set_table(self.table)
+            self.table = None
 
     def get_fields(self, table_id):
         cursor = self.connection.cursor()
-        field_list = list()
+
         filed_attributes = cursor.execute("""\
         select 
             position,
@@ -155,29 +194,66 @@ class DBDtoRAM:
             field_name = value["name"]
             field_position = value["position"]
             field = Field(field_name, field_position)
-            field.rname = value["russian_short_name"]
-            field.description = value["description"]
-            props = list()
-            props.append(value["can_input"])
-            props.append(value["can_edit"])
-            props.append(value["show_in_grid"])
-            props.append(value["show_in_details"])
-            props.append(value["is_mean"])
-            props.append(value["autocalculated"])
-            props.append(value["required"])
-            field.props = props
+            field.set_rname(value["russian_short_name"])
+            field.set_description(value["description"])
+
+            props = ""
+            first = True
+            if (value["can_input"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "can_input"
+            if (value["can_edit"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "can_edit"
+            if (value["show_in_grid"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "show_in_grid"
+            if (value["show_in_details"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "show_in_details"
+            if (value["is_mean"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "is_mean"
+            if (value["autocalculated"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "autocalculated"
+            if (value["required"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "required"
+            field.set_props(props)
+
             domain_id = value["domain_id"]
-            field.domain = cursor.execute("""
+            domain_name = cursor.execute("""
                         select name 
                         from dbd$domains 
                         where dbd$domains.id = ?""", (domain_id,)).fetchone()[0]
-            field_list.append(field)
-
-        return field_list
+            field.set_domain(domain_name)
+            self.table.set_field(field.name, field)
 
     def get_constraints(self, table_id):
         cursor = self.connection.cursor()
-        constraints_list = list()
+
         constraints_attributes = cursor.execute("""
             select
             id,
@@ -192,15 +268,38 @@ class DBDtoRAM:
 
         for value in constraints_attributes:
             id = value["id"]
-            kind = value["constraint_type"]
-            constraint = Constraint(kind, 1)
-            constraint.reference = value["reference"]
-            props = list()
-            props.append(value["has_value_edit"])
-            props.append(value["cascading_delete"])
-            constraint.props = props
+            if (value["constraint_type"] == "P"):
+                kind = "PRIMARY"
+            elif (value["constraint_type"] == "F"):
+                kind = "FOREIGN"
 
-            constraint.items = cursor.execute("""
+            constraint = Constraint(kind, 1)
+            id_table_ref = value["reference"]
+            if (id_table_ref is not None):
+                reference_table = cursor.execute("""\
+                        select
+                        name
+                        from dbd$tables where dbd$tables.id=?""", (id_table_ref,))\
+                    .fetchone()
+                constraint.set_reference(reference_table["name"])
+
+            props = ""
+            first = True
+            if (value["has_value_edit"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "has_value_edit"
+            if (value["cascading_delete"]):
+                if (first):
+                    first = False
+                else:
+                    props += ", "
+                props += "cascading_delete"
+            constraint.set_props(props)
+
+            constraint_items = cursor.execute("""
                     select name
                     from dbd$fields
                     where dbd$fields.id = (\
@@ -208,14 +307,11 @@ class DBDtoRAM:
                             from dbd$constraint_details\
                             where dbd$constraint_details.constraint_id = ?)""",
                                               (id,)).fetchone()[0]
-
-            constraints_list.append(constraint)
-
-        return constraints_list
+            constraint.set_items(constraint_items)
+            self.table.set_constraint(constraint)
 
     def get_indices(self, table_id):
         cursor = self.connection.cursor()
-        indices_list = list()
         indices_attributes = cursor.execute("""
             select 
                 id,
@@ -239,8 +335,5 @@ class DBDtoRAM:
                     where dbd$index_details.index_id = ?)""", (id,)).fetchone()
 
             field_name = field["name"]
-            field_position = field["position"]
-            index = Index(field_name, field_position)
-
-            indices_list.append(index)
-        return indices_list
+            index = Index(field_name, id)
+            self.table.set_index(index)
