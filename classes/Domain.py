@@ -91,7 +91,13 @@ class Domain:
             props_temp.append(prop.strip())
         if (props_temp is not None) & (len(props_temp) != 0):
             self.parameters_order.append("props")
+        props_temp_set = set(props_temp)
+        props_temp.clear()
+        for p in props_temp_set:
+            if not(p == ""):
+                props_temp.append(p)
         self.props = set(props_temp)
+
 
     def get_props(self):
         return self.props
